@@ -1,3 +1,4 @@
-import os
-for i in range(0, 12):
-    os.remove(f"htmls/{i}.html")
+import pandas as pd
+
+df = pd.read_json("products2_data.json")
+df.to_csv("products_data.csv")      

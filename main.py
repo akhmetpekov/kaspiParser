@@ -13,12 +13,17 @@ headers = {
     "User-Agent":"Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Mobile Safari/537.36"
 }
 
-product_data_list = []
 
+def extract_float(text):
+    # use regular expression to match all non-numeric characters
+    text = re.sub(r'[^\d.]', '', text)
+    # convert string to float
+    return float(text)
 count = 0
 driver = Chrome("chromedriver")
 
 for i in range(1, 31):
+    product_data_list = []
     driver.get(url + str(i))
     links = []
 
@@ -114,26 +119,33 @@ for i in range(1, 31):
         memory = value
 
         product_data_list.append({
-            "Ссылка": links[i],
-            "Название": title,
-            "Цена":price,
-            "Рассрочка":installment,
-            "Диагональ экрана":diagonal,
-            "Разрешение экрана":resolution,
-            "Частота обновления экрана":frequency,
-            "Тип матрицы":matrix,
-            "Процессор": processor,
-            "Видеокарта":videocard,
-            "Размер оперативной памяти":ram,
-            "Тип жесткого диска":hddtype,
-            "Общий объем накопителей":memory,
+            "characteristics": {
+                "Диагональ экрана":float(diagonal[:len(diagonal) - 5]),
+                "Разрешение экрана":resolution,
+                "Частота обновления экрана":float(frequency[:len(frequency)-3]),
+                "Процессор": processor,
+                "Видеокарта":videocard,
+                "Тип матрицы":matrix,
+                "Размер оперативной памяти":float(ram[:len(ram)-3]),
+                "Тип жесткого диска":hddtype,
+                "Общий объем накопителей":float(memory[:len(memory)-3]),
+            },
+            "data": {
+                "link": links[i],
+                "name": title,
+                "price": extract_float(price),
+                "rassrochka": extract_float(installment),
+            }
         })
         count+=1
         print("Added " + str(count) + " item" + title)
     for i in range(0, 12):
         os.remove(f"htmls/{i}.html")
 
-    with open("products_data.json", "a", encoding="utf-8") as file:
+    with open("products3_data.json", "a", encoding="utf-8") as file:
         json.dump(product_data_list, file, indent=4, ensure_ascii=False)
+
+
+    
 
 
